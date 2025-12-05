@@ -1,9 +1,8 @@
-$ErrorActionPreference = "Stop"
-
 param (
     [string]$Arch = "x64"
 )
 
+$ErrorActionPreference = "Stop"
 $Runtime = "win-$Arch"
 
 Write-Host "Building IpChanger Solution for $Arch..."
