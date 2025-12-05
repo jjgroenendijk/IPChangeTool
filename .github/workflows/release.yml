@@ -3,8 +3,6 @@ name: Build and Release
 on:
   push:
     branches: [ "main" ]
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -44,7 +42,6 @@ jobs:
 
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - name: Download x64 Artifact
@@ -59,8 +56,9 @@ jobs:
           name: msi-arm64
           path: release_files
 
-      - name: Create Release
+      - name: Publish Build Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: build-${{ github.run_number }}
+          name: Build ${{ github.run_number }}
           files: release_files/*.msi
-          generate_release_notes: true
