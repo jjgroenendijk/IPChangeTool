@@ -1,0 +1,39 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="IpChanger Tool" Manufacturer="Gemini User" Version="1.0.0.0" UpgradeCode="12345678-1234-1234-1234-123456789012" InstallerVersion="500">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="ProductFeature" Title="IpChanger" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="IpChangerTool" />
+    </StandardDirectory>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="ServiceComponent" Guid="87654321-4321-4321-4321-210987654321" Bitness="always64">
+        <File Id="ServiceExe" Source="..\src\IpChanger.Service\bin\Release\net8.0\win-x64\publish\IpChanger.Service.exe" KeyPath="yes" />
+        <ServiceInstall Id="ServiceInstaller"
+                        Type="ownProcess"
+                        Name="IpChangerService"
+                        DisplayName="IP Changer Service"
+                        Description="Helper service for changing IP addresses without admin rights."
+                        Start="auto"
+                        Account="LocalSystem"
+                        ErrorControl="normal" />
+        <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="IpChangerService" Wait="yes" />
+      </Component>
+
+      <Component Id="UIComponent" Guid="12345678-1234-1234-1234-1234567890AB" Bitness="always64">
+        <File Id="UIExe" Source="..\src\IpChanger.UI\bin\Release\net8.0-windows\win-x64\publish\IpChanger.UI.exe" KeyPath="yes" />
+        <Shortcut Id="ApplicationStartMenuShortcut" 
+                  Directory="ProgramMenuFolder" 
+                  Name="IP Changer Tool" 
+                  WorkingDirectory="INSTALLFOLDER" 
+                  Advertise="yes" />
+      </Component>
+    </ComponentGroup>
+  </Package>
+</Wix>
