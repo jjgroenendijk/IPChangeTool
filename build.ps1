@@ -5,7 +5,7 @@ param (
 $ErrorActionPreference = "Stop"
 $Runtime = "win-$Arch"
 
-Write-Host "Building IpChanger Solution for $Arch..."
+Write-Host "Building IPCT Solution for $Arch..."
 
 # 1. Publish Service (Single File, Self Contained)
 Write-Host "Publishing Service..."
@@ -29,7 +29,7 @@ dotnet build installer/IpChanger.Installer.wixproj -c Release /p:Platform=$Arch 
 
 # 4. Set permissions on MSI file to allow all users to read
 # The output path depends on the platform.
-$MsiPath = "installer\bin\$Arch\Release\IpChangerInstaller.msi"
+$MsiPath = "installer\bin\$Arch\Release\IPCTInstaller.msi"
 
 Write-Host "Setting file permissions on $MsiPath..."
 if (Test-Path $MsiPath) {

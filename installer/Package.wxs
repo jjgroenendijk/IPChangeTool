@@ -1,15 +1,21 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="IpChanger Tool" Manufacturer="Gemini User" Version="1.0.0.0" UpgradeCode="12345678-1234-1234-1234-123456789012" InstallerVersion="500">
+  <Package Name="IPCT" Manufacturer="jjgroenendijk.nl" Version="1.0.0.0" UpgradeCode="12345678-1234-1234-1234-123456789012" InstallerVersion="500">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
     <MediaTemplate EmbedCab="yes" />
 
-    <Feature Id="ProductFeature" Title="IpChanger" Level="1">
+    <!-- Icon for Add/Remove Programs -->
+    <Icon Id="IPCT.ico" SourceFile="$(var.UISourceDir)\Resources\IPCT.ico" />
+    <Property Id="ARPPRODUCTICON" Value="IPCT.ico" />
+
+    <Feature Id="ProductFeature" Title="IPCT" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="IpChangerTool" />
+      <Directory Id="INSTALLFOLDER" Name="IPCT">
+        <Directory Id="ResourcesFolder" Name="Resources" />
+      </Directory>
     </StandardDirectory>
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
@@ -18,7 +24,7 @@
         <ServiceInstall Id="ServiceInstaller"
                         Type="ownProcess"
                         Name="IpChangerService"
-                        DisplayName="IP Changer Service"
+                        DisplayName="IPCT Service"
                         Description="Helper service for changing IP addresses without admin rights."
                         Start="auto"
                         Account="LocalSystem"
@@ -30,9 +36,14 @@
         <File Id="UIExe" Source="$(var.UISourceDir)\IpChanger.UI.exe" KeyPath="yes" />
         <Shortcut Id="ApplicationStartMenuShortcut" 
                   Directory="ProgramMenuFolder"
-                  Name="IP Changer Tool" 
+                  Name="IPCT" 
                   WorkingDirectory="INSTALLFOLDER" 
+                  Icon="IPCT.ico"
                   Advertise="yes" />
+      </Component>
+
+      <Component Id="IconComponent" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890" Bitness="always64" Directory="ResourcesFolder">
+        <File Id="IconFile" Source="$(var.UISourceDir)\Resources\IPCT.ico" KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Package>

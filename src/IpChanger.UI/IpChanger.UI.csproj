@@ -8,7 +8,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
+    
+    <!-- Application metadata -->
+    <ApplicationIcon>Resources\IPCT.ico</ApplicationIcon>
+    <AssemblyTitle>IPCT</AssemblyTitle>
+    <Product>IPCT</Product>
+    <Company>jjgroenendijk.nl</Company>
+    <Description>IP Change Tool - Allows non-admin users to change network settings</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\IPCT.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IpChanger.Common\IpChanger.Common.csproj" />

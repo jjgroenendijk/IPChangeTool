@@ -1,4 +1,4 @@
-# IP Changer Tool
+# IPCT (IP Change Tool)
 
 A secure Windows utility that allows standard (non-admin) users to change IP addresses, Subnet Masks, Gateways, and DNS settings of network adapters.
 
@@ -54,12 +54,12 @@ The project includes a PowerShell script to automate the build process.
     - Publishes `IpChanger.UI` as a self-contained, single-file executable.
     - Builds the MSI installer.
 4.  The final installer is located at:
-    `installer\bin\x64\Release\IpChangerInstaller.msi`
+    `installer\bin\x64\Release\IPCTInstaller.msi`
 
 ## Installation & Usage
 
-1.  **Install**: Run the `IpChangerInstaller.msi`. You will need Administrator privileges *once* to install the service.
-2.  **Run**: Launch **"IP Changer Tool"** from the Start Menu or Desktop shortcut.
+1.  **Install**: Run the `IPCTInstaller.msi`. You will need Administrator privileges *once* to install the service.
+2.  **Run**: Launch **"IPCT"** from the Start Menu.
 3.  **Configure**:
     - Select a Network Adapter from the dropdown.
     - Choose **"Obtain IP Automatically (DHCP)"** or enter **Static IP** details.
@@ -81,3 +81,7 @@ To test without installing the MSI:
     - Navigate to `src/IpChanger.UI`.
     - Run: `dotnet run`
     - The UI will launch and should connect to the running service instance.
+
+## Author
+
+Developed by [jjgroenendijk.nl](https://jjgroenendijk.nl)

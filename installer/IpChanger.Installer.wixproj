@@ -1,6 +1,6 @@
 <Project Sdk="WixToolset.Sdk/4.0.0">
   <PropertyGroup>
-    <OutputName>IpChangerInstaller</OutputName>
+    <OutputName>IPCTInstaller</OutputName>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <DefineConstants>ServiceSourceDir=$(ServiceSourceDir);UISourceDir=$(UISourceDir)</DefineConstants>
   </PropertyGroup>

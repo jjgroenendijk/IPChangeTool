@@ -197,10 +197,17 @@ public partial class MainForm : Form
 
     private void InitializeComponent()
     {
-        this.Text = "IP Changer Tool";
+        this.Text = "IPCT";
         this.Size = new Size(400, 400);
         this.FormBorderStyle = FormBorderStyle.FixedSingle;
         this.MaximizeBox = false;
+        
+        // Set form icon from embedded resource
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Resources", "IPCT.ico");
+        if (File.Exists(iconPath))
+        {
+            this.Icon = new Icon(iconPath);
+        }
 
         int y = 20;
         int lblW = 100;
