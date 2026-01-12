@@ -1,5 +1,6 @@
 using System.Net.NetworkInformation;
 using System.IO.Pipes;
+using System.Reflection;
 using System.Text.Json;
 using IpChanger.Common;
 
@@ -14,9 +15,13 @@ public partial class MainForm : Form
     private TextBox txtGateway;
     private TextBox txtDns;
     private Button btnApply;
+    private Button btnRefresh;
+    private Button btnCopy;
     private Label lblStatus;
     private StatusStrip statusStrip;
     private ToolStripStatusLabel lblServiceStatus;
+    private ToolStripStatusLabel lblVersion;
+    private ToolTip toolTip;
     private System.Windows.Forms.Timer timerStatus;
 
     public MainForm()
@@ -65,9 +70,61 @@ public partial class MainForm : Form
         if (cmbAdapters.Items.Count > 0) cmbAdapters.SelectedIndex = 0;
     }
 
+    private bool ValidateInputs(out string errorMessage)
+    {
+        errorMessage = "";
+
+        if (!chkDhcp.Checked)
+        {
+            // Validate IP Address
+            if (!System.Net.IPAddress.TryParse(txtIp.Text.Trim(), out _))
+            {
+                errorMessage = "Invalid IP address format.";
+                return false;
+            }
+
+            // Validate Subnet Mask
+            if (!System.Net.IPAddress.TryParse(txtSubnet.Text.Trim(), out _))
+            {
+                errorMessage = "Invalid subnet mask format.";
+                return false;
+            }
+
+            // Validate Gateway (optional - only if provided)
+            if (!string.IsNullOrWhiteSpace(txtGateway.Text) &&
+                !System.Net.IPAddress.TryParse(txtGateway.Text.Trim(), out _))
+            {
+                errorMessage = "Invalid gateway address format.";
+                return false;
+            }
+
+            // Validate DNS (optional - comma-separated IPs)
+            if (!string.IsNullOrWhiteSpace(txtDns.Text))
+            {
+                var dnsEntries = txtDns.Text.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var dns in dnsEntries)
+                {
+                    if (!System.Net.IPAddress.TryParse(dns.Trim(), out _))
+                    {
+                        errorMessage = $"Invalid DNS server format: {dns.Trim()}";
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     private void btnApply_Click(object sender, EventArgs e)
     {
         if (cmbAdapters.SelectedItem is not AdapterItem selected) return;
+
+        if (!ValidateInputs(out string validationError))
+        {
+            MessageBox.Show(validationError, "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
 
         var request = new IpConfigRequest
         {
@@ -181,6 +238,20 @@ public partial class MainForm : Form
         }
     }
 
+    private void btnCopy_Click(object sender, EventArgs e)
+    {
+        var adapter = cmbAdapters.SelectedItem as AdapterItem;
+        var config = $"Adapter: {adapter?.Name ?? "None"}\n" +
+                     $"DHCP: {(chkDhcp.Checked ? "Enabled" : "Disabled")}\n" +
+                     $"IP Address: {txtIp.Text}\n" +
+                     $"Subnet Mask: {txtSubnet.Text}\n" +
+                     $"Gateway: {txtGateway.Text}\n" +
+                     $"DNS: {txtDns.Text}";
+
+        Clipboard.SetText(config);
+        lblStatus.Text = "Configuration copied to clipboard.";
+    }
+
     private class AdapterItem
     {
         public string Name { get; }
@@ -197,11 +268,11 @@ public partial class MainForm : Form
 
     private void InitializeComponent()
     {
-        this.Text = "IPCT";
-        this.Size = new Size(400, 400);
+        this.Text = "IPCT - IP Change Tool";
+        this.Size = new Size(400, 440);
         this.FormBorderStyle = FormBorderStyle.FixedSingle;
         this.MaximizeBox = false;
-        
+
         // Set form icon from embedded resource
         var iconPath = Path.Combine(AppContext.BaseDirectory, "Resources", "IPCT.ico");
         if (File.Exists(iconPath))
@@ -209,14 +280,21 @@ public partial class MainForm : Form
             this.Icon = new Icon(iconPath);
         }
 
+        // Initialize tooltip
+        toolTip = new ToolTip();
+
         int y = 20;
         int lblW = 100;
         int txtW = 200;
         int h = 25;
 
         var lblAdapter = new Label { Text = "Adapter:", Location = new Point(20, y), Size = new Size(lblW, h) };
-        cmbAdapters = new ComboBox { Location = new Point(120, y), Size = new Size(240, h), DropDownStyle = ComboBoxStyle.DropDownList };
+        cmbAdapters = new ComboBox { Location = new Point(120, y), Size = new Size(205, h), DropDownStyle = ComboBoxStyle.DropDownList };
         cmbAdapters.SelectedIndexChanged += cmbAdapters_SelectedIndexChanged;
+
+        // Refresh button next to adapter dropdown
+        btnRefresh = new Button { Text = "\u21BB", Location = new Point(330, y - 1), Size = new Size(30, 24) };
+        btnRefresh.Click += (s, e) => LoadAdapters();
         y += 40;
 
         chkDhcp = new CheckBox { Text = "Obtain IP Automatically (DHCP)", Location = new Point(120, y), Size = new Size(240, h) };
@@ -241,14 +319,37 @@ public partial class MainForm : Form
 
         btnApply = new Button { Text = "Apply Settings", Location = new Point(120, y), Size = new Size(120, 40) };
         btnApply.Click += btnApply_Click;
+
+        // Copy button next to Apply button
+        btnCopy = new Button { Text = "Copy Config", Location = new Point(250, y), Size = new Size(100, 40) };
+        btnCopy.Click += btnCopy_Click;
         y += 50;
 
         lblStatus = new Label { Text = "Ready", Location = new Point(20, y), Size = new Size(340, h), AutoSize = false, TextAlign = ContentAlignment.MiddleCenter };
 
+        // Status strip with service status and version
         statusStrip = new StatusStrip();
         lblServiceStatus = new ToolStripStatusLabel { Text = "Checking Service..." };
+        lblVersion = new ToolStripStatusLabel { Alignment = ToolStripItemAlignment.Right };
         statusStrip.Items.Add(lblServiceStatus);
+        statusStrip.Items.Add(new ToolStripStatusLabel { Spring = true }); // Spacer
+        statusStrip.Items.Add(lblVersion);
 
-        this.Controls.AddRange(new Control[] { lblAdapter, cmbAdapters, chkDhcp, lblIp, txtIp, lblSubnet, txtSubnet, lblGateway, txtGateway, lblDns, txtDns, btnApply, lblStatus, statusStrip });
+        // Set version from assembly info
+        var version = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion ?? "Unknown";
+        lblVersion.Text = $"v{version}";
+
+        // Set tooltips
+        toolTip.SetToolTip(txtIp, "Enter IPv4 address (e.g., 192.168.1.100)");
+        toolTip.SetToolTip(txtSubnet, "Enter subnet mask (e.g., 255.255.255.0)");
+        toolTip.SetToolTip(txtGateway, "Enter gateway address (optional)");
+        toolTip.SetToolTip(txtDns, "Enter DNS servers, comma-separated (e.g., 8.8.8.8, 8.8.4.4)");
+        toolTip.SetToolTip(chkDhcp, "Enable to obtain IP address automatically from DHCP server");
+        toolTip.SetToolTip(btnRefresh, "Refresh adapter list");
+        toolTip.SetToolTip(btnCopy, "Copy current configuration to clipboard");
+
+        this.Controls.AddRange(new Control[] { lblAdapter, cmbAdapters, btnRefresh, chkDhcp, lblIp, txtIp, lblSubnet, txtSubnet, lblGateway, txtGateway, lblDns, txtDns, btnApply, btnCopy, lblStatus, statusStrip });
     }
 }

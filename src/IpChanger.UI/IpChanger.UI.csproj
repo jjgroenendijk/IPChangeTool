@@ -15,6 +15,10 @@
     <Product>IPCT</Product>
     <Company>jjgroenendijk.nl</Company>
     <Description>IP Change Tool - Allows non-admin users to change network settings</Description>
+
+    <!-- Version info - SourceRevisionId is passed from build script -->
+    <Version>1.0.0</Version>
+    <SourceRevisionId Condition="'$(SourceRevisionId)' == ''">dev</SourceRevisionId>
   </PropertyGroup>
 
   <ItemGroup>

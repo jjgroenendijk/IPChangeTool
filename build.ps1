@@ -1,11 +1,17 @@
 param (
-    [string]$Arch = "x64"
+    [string]$Arch = "x64",
+    [string]$BuildDate = ""
 )
 
 $ErrorActionPreference = "Stop"
 $Runtime = "win-$Arch"
 
-Write-Host "Building IPCT Solution for $Arch..."
+# If no BuildDate provided, use current date
+if ([string]::IsNullOrEmpty($BuildDate)) {
+    $BuildDate = (Get-Date).ToString("yyyy-MM-dd")
+}
+
+Write-Host "Building IPCT Solution for $Arch (Build: $BuildDate)..."
 
 # 1. Publish Service (Single File, Self Contained)
 Write-Host "Publishing Service..."
@@ -13,7 +19,7 @@ dotnet publish src/IpChanger.Service/IpChanger.Service.csproj -c Release -r $Run
 
 # 2. Publish UI (Single File, Self Contained)
 Write-Host "Publishing UI..."
-dotnet publish src/IpChanger.UI/IpChanger.UI.csproj -c Release -r $Runtime --self-contained /p:PublishSingleFile=true
+dotnet publish src/IpChanger.UI/IpChanger.UI.csproj -c Release -r $Runtime --self-contained /p:PublishSingleFile=true /p:SourceRevisionId=$BuildDate
 
 # Define paths for WiX (needs to be passed to the project)
 # Use absolute paths to avoid confusion

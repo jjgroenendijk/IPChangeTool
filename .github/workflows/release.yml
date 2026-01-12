@@ -28,7 +28,9 @@ jobs:
         run: dotnet tool install --global wix
 
       - name: Build and Package
-        run: .\build.ps1 -Arch ${{ matrix.arch }}
+        run: |
+          $buildDate = (Get-Date).ToString("yyyy-MM-dd")
+          .\build.ps1 -Arch ${{ matrix.arch }} -BuildDate $buildDate
 
       - name: Rename MSI
         run: |
